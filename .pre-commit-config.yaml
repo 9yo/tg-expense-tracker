@@ -50,13 +50,11 @@ repos:
     language: system
     pass_filenames: false
     types: [python]
-    args: [--count, .]
+    args: ["--count", "--extend-ignore=D", "--max-line-length=99", "--show-source", "--statistics"]
 
   - id: mypy
     name: Validate types with MyPy
-    entry: poetry run mypy
+    entry: poetry run mypy .
     language: system
     types: [python]
     pass_filenames: false
-    args:
-    - "ct_ws"
