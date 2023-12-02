@@ -15,7 +15,7 @@ def test_spending_from_string() -> None:
 
     spending = Spending.from_string(
         f"Lunch;{spending_cost};Food;Nice meal;USD;Cash;"
-        + f"{spending_year}-{spending_month}-{spending_day}",
+        + f"{spending_year}-{spending_month}-0{spending_day}",
     )
 
     assert spending.name == "Lunch"
