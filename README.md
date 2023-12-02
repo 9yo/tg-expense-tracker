@@ -19,7 +19,7 @@ poetry run ... # here is depensds on that you want to run
 # You must set up env variables also
 TELEGRAM_BOT_TOKEN=<your telegram token>
 SPREADSHEET_ID=<your spreadsheet ID>
-``` 
+```
 
 ## Tests
 ```bash
