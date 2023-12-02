@@ -73,7 +73,7 @@ jobs:
       env:
         POETRY_VIRTUALENVS_CREATE: false
     - name: Run pytest check
-      run: poetry run pytest -vv --cov="ct_ws" .
+      run: poetry run pytest -vv .
       env:
         CT_WS_HOST: "0.0.0.0"
         CT_WS_DB_HOST: localhost
