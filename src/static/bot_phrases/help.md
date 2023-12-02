@@ -14,13 +14,13 @@
 
 **Add Spending:**
 Here is spending format:
-- **Name** _<class 'str'>_; 
-- **Category** _<class 'str'>_; 
-- **Description** _<class 'str'>_; 
-- **Cost** _<class 'float'>_; 
-- **Currency** _typing.Literal['USD', 'RUB', 'GEL', 'EUR', 'LIR', 'DUR']_; 
-- **Source** _typing.Literal['Cash', 'Card', 'Bank', 'Crypto']_; 
-- **Date** _<class 'datetime.date'>_; 
+- **Name** _<class 'str'>_;
+- **Category** _<class 'str'>_;
+- **Description** _<class 'str'>_;
+- **Cost** _<class 'float'>_;
+- **Currency** _typing.Literal['USD', 'RUB', 'GEL', 'EUR', 'LIR', 'DUR']_;
+- **Source** _typing.Literal['Cash', 'Card', 'Bank', 'Crypto']_;
+- **Date** _<class 'datetime.date'>_;
 
 **Examples**:
 ```text
