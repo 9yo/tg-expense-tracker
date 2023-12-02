@@ -50,7 +50,7 @@ repos:
     language: system
     pass_filenames: false
     types: [python]
-    args: ["--count", "--extend-ignore=D", "--max-line-length=99", "--show-source", "--statistics"]
+    args: ["--count", "--extend-ignore=D, E800", "--max-line-length=99", "--show-source", "--statistics"]
 
   - id: mypy
     name: Validate types with MyPy
