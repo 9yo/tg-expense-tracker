@@ -1,3 +1,7 @@
+.space
+service_credentials.json
+Spacefile
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
