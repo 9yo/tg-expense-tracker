@@ -262,8 +262,8 @@ def add_spending(spending: Spending) -> Dict[str, str]:  # noqa: WPS210
     """
     Adds Spending it to the Google Sheets document.
 
-    :param spending: Spending: Specify the type of data that is expected to be passed into
-        the function
+    :param spending: Spending: Specify the type of data that is expected to be passed
+        into the function
     :return: A dictionary with a status key
     :returns: Dict[str, str]: A dictionary with a status key
     """
