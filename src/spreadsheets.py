@@ -8,7 +8,7 @@ from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from src.finances import SheetSpending, Spending
-from src.settings import SPREADSHEET_ID
+from src.settings import SPREADSHEET_ID, SERVICE_ACCOUNT_FILE_PATH
 
 # Constants
 SCOPES = (
@@ -203,7 +203,7 @@ def append_to_last_row(  # noqa: WPS210
 @functools.lru_cache()
 def get_sheets_service() -> Any:
     credentials = get_credentials(
-        service_account_file="service_credentials.json",
+        service_account_file=SERVICE_ACCOUNT_FILE_PATH,
     )
 
     return build("sheets", "v4", credentials=credentials).spreadsheets()
