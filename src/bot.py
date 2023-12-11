@@ -159,8 +159,7 @@ async def add_spending(message: types.Message) -> None:
     except ValueError as error:
         await safe_replay(message, str(error))
         return
-    for spending in spending_objects:
-        add_spending_spreadsheet(spending)
+    add_spending_spreadsheet(spending_objects)
     await safe_replay(
         message,
         f"Spendings added, count: {len(spending_objects)}",  # noqa:WPS237
