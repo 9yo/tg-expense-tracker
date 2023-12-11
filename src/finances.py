@@ -1,9 +1,7 @@
-import json
 from datetime import date
 from typing import Any, List, Literal, Optional
 
 from pydantic import BaseModel, Field
-
 from src.currency_converter import CurrencyConverter
 
 
@@ -86,7 +84,7 @@ class SheetSpending(Spending):
         try:
             usd: float = float(list_[7].replace(",", "."))
         except IndexError:
-            usd: float = CurrencyConverter.convert(
+            usd = CurrencyConverter.convert(
                 amount=cost,
                 from_currency=currency,
                 to_currency="USD",
@@ -112,7 +110,7 @@ class SheetSpending(Spending):
             usd_amount = spending.cost
 
         else:
-            usd_amount: float = CurrencyConverter.convert(
+            usd_amount = CurrencyConverter.convert(
                 amount=spending.cost,
                 from_currency=spending.currency,
                 to_currency="USD",

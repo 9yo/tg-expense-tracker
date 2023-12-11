@@ -1,12 +1,11 @@
 """FastAPI server for webhook."""
 import logging
 from json import JSONDecodeError
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 import requests
 from aiogram import types
 from fastapi import FastAPI, Request
-
 from src.bot import bot, bot_url, dp
 from src.settings import WEBHOOK_HOST
 
@@ -41,7 +40,10 @@ def url_setter() -> Dict[Any, Any]:
     Returns:
         dict: The response from the webhook URL setup.
     """
-    set_url = (f"{bot_url}/setWebHook?url=https://{WEBHOOK_HOST}"
-               f"/webhook?drop_pending_updates={str(True)}")
+
+    set_url: str = f"{bot_url}/setWebHook?url=https://{WEBHOOK_HOST}"
+    set_url = f"{set_url}/webhook"
+    set_url = f"{set_url}?drop_pending_updates=True"
+
     resp = requests.get(set_url, timeout=10)  # Added a timeout
     return resp.json()

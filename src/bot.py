@@ -1,13 +1,12 @@
 """Telegram bot for managing spendings."""
 import logging
 from collections import defaultdict
-from typing import List
+from typing import Any, List
 
 from aiogram import Bot, Dispatcher, types
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.filters import Command
 from aiogram.utils.formatting import Bold, as_key_value, as_list, as_marked_section
-
 from src.finances import SheetSpending, Spending
 from src.phrase import HELP_MESSAGE, WELCOME_MESSAGE
 from src.settings import MAX_SPENDINGS_IN_BULK_REQUESTS, TELEGRAM_BOT_TOKEN
@@ -128,7 +127,9 @@ async def generate_report(message: types.Message) -> None:
         return
 
     await safe_replay(
-        message, generate_report_message(spendings), parse_mode="MarkdownV2"
+        message,
+        generate_report_message(spendings),
+        parse_mode="MarkdownV2",
     )
 
 
@@ -153,8 +154,7 @@ async def add_spending(message: types.Message) -> None:
         if spending_objects and len(spending_objects) > MAX_SPENDINGS_IN_BULK_REQUESTS:
             await safe_replay(
                 message,
-                f"Message too long: {len(spending_objects)}",
-                # noqa:WPS237
+                f"Message too long: {len(spending_objects)}",  # noqa:WPS237
             )
     except ValueError as error:
         await safe_replay(message, str(error))
@@ -166,7 +166,7 @@ async def add_spending(message: types.Message) -> None:
     )
 
 
-async def safe_replay(message: types.Message, *args, **kwargs) -> None:
+async def safe_replay(message: types.Message, *args: Any, **kwargs: Any) -> None:
     try:
         await message.reply(*args, **kwargs)
     except TelegramBadRequest as err:
