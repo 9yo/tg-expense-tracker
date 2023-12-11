@@ -102,11 +102,6 @@ async def add_spending(message: types.Message) -> None:
         spending_objects = [
             Spending.from_string(record.strip()) for record in spending_records
         ]
-        if spending_objects and len(spending_objects) > MAX_SPENDINGS_IN_BULK_REQUESTS:
-            await safe_replay(
-                message,
-                f"Message too long: {len(spending_objects)}",  # noqa:WPS237
-            )
     except ValueError as error:
         await safe_replay(message, str(error))
         return
