@@ -95,7 +95,7 @@ class SheetSpending(Spending):
 
     @classmethod
     def from_spending(cls, spending: Spending) -> "SheetSpending":
-        usd_amount: float | None = None
+        usd_amount: Optional[float] = None
 
         if spending.currency == "USD":
             usd_amount = spending.cost
