@@ -10,7 +10,7 @@ from aiogram.types import BufferedInputFile  # noqa:WPS458
 from src.finances import Spending
 from src.phrase import HELP_MESSAGE, WELCOME_MESSAGE
 from src.report_service import ReportService
-from src.settings import MAX_SPENDINGS_IN_BULK_REQUESTS, TELEGRAM_BOT_TOKEN
+from src.settings import TELEGRAM_BOT_TOKEN
 from src.spreadsheets import add_spending as add_spending_spreadsheet
 
 logging.basicConfig(level=logging.INFO)
