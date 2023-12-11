@@ -1,5 +1,5 @@
 from src.finances import Spending
-from src.settings import WELCOME_MD_FILE_PATH, HELP_MD_FILE_PATH
+from src.settings import HELP_MD_FILE_PATH, WELCOME_MD_FILE_PATH
 
 SPEDING_SCHEMA = Spending.generate_string_schema()
 

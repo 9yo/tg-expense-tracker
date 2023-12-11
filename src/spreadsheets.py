@@ -2,13 +2,13 @@
 
 import functools
 from datetime import date
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from src.finances import SheetSpending, Spending
-from src.settings import SPREADSHEET_ID, SERVICE_ACCOUNT_FILE_PATH
+from src.settings import SERVICE_ACCOUNT_FILE_PATH, SPREADSHEET_ID
 
 # Constants
 SCOPES = (
@@ -28,7 +28,7 @@ def get_credentials(service_account_file: str) -> service_account.Credentials:
     )
 
 
-def find_sub_sheet(sheet_data: Dict[str, Any], name: str) -> int | None:
+def find_sub_sheet(sheet_data: Dict[str, Any], name: str) -> Optional[int]:
     """Find a sub-sheet by name within a sheet."""
     for sheet_properties in sheet_data.get("sheets", []):
         if sheet_properties["properties"]["title"] == name:
@@ -209,7 +209,7 @@ def get_sheets_service() -> Any:
     return build("sheets", "v4", credentials=credentials).spreadsheets()
 
 
-def read_spreedsheet(year: int, month: int, day: int | None = None) -> Any:
+def read_spreedsheet(year: int, month: int, day: Optional[int] = None) -> Any:
     sheets_service = get_sheets_service()
 
     try:
@@ -237,7 +237,7 @@ def read_spreedsheet(year: int, month: int, day: int | None = None) -> Any:
     )
 
 
-def get_spendings(year: int, month: int, day: int | None = None) -> List[SheetSpending]:
+def get_spendings(year: int, month: int, day: Optional[int] = None) -> List[SheetSpending]:
     """
     Returns a list of SheetSpending objects.
 
@@ -278,7 +278,7 @@ def add_spending(spending: Spending) -> Dict[str, str]:  # noqa: WPS210
         spending.datetime.month,
     )
 
-    sub_sheet_id: int | None = find_sub_sheet(sheet, sub_sheet_name)
+    sub_sheet_id: Optional[int] = find_sub_sheet(sheet, sub_sheet_name)
 
     if sub_sheet_id is None:
         sub_sheet_response: Dict[str, Any] = create_sub_sheet(

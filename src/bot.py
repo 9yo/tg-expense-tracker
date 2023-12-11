@@ -8,7 +8,7 @@ from aiogram.filters import Command
 from aiogram.utils.formatting import Bold, as_key_value, as_list, as_marked_section
 from src.finances import SheetSpending, Spending
 from src.phrase import HELP_MESSAGE, WELCOME_MESSAGE
-from src.settings import TELEGRAM_BOT_TOKEN, MAX_SPENDINGS_IN_BULK_REQUESTS
+from src.settings import MAX_SPENDINGS_IN_BULK_REQUESTS, TELEGRAM_BOT_TOKEN
 from src.spreadsheets import add_spending as add_spending_spreadsheet
 from src.spreadsheets import get_spendings
 
