@@ -2,7 +2,7 @@ from collections import defaultdict
 from io import BytesIO
 from typing import List, Optional, Tuple
 
-import pygal
+# import pygal
 from aiogram.utils.formatting import Bold, as_key_value, as_list, as_marked_section
 # from matplotlib import pyplot as plt
 from src.finances import SheetSpending
