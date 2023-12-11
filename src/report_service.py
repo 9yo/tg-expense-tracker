@@ -2,29 +2,30 @@ from collections import defaultdict
 from io import BytesIO
 from typing import List, Optional, Tuple
 
-import matplotlib.pyplot as plt
-from aiogram.utils.formatting import as_list, as_marked_section, Bold, as_key_value
-
+from aiogram.utils.formatting import Bold, as_key_value, as_list, as_marked_section
+from matplotlib import pyplot as plt
 from src.finances import SheetSpending
 from src.spreadsheets import get_spendings
 
 
 class ReportService:
     @staticmethod
-    def generate_pie(percentages, categories) -> BytesIO:
+    def generate_pie(percentages: List[float], categories: List[str]) -> BytesIO:
         sorted_categories = [
-            x for _, x in sorted(zip(percentages, categories), reverse=True)
+            categ for _, categ in sorted(zip(percentages, categories), reverse=True)
         ]
         sorted_percentages = sorted(percentages, reverse=True)
 
         # Create a pie chart
         plt.figure(figsize=(10, 10))
 
+        chart_rotation = 140
+
         plt.pie(
             sorted_percentages,
             labels=sorted_categories,
-            autopct="%1.1f%%",
-            startangle=140,
+            autopct="%1.1f%%",  # noqa:WPS323
+            startangle=chart_rotation,
         )
 
         # Improve legibility by moving the legend outside the plot
@@ -46,8 +47,11 @@ class ReportService:
         return buf
 
     @classmethod
-    def generate_report(
-        cls, year: str, month: str, day: Optional[str] = None
+    def generate_report(  # noqa:WPS210
+        cls,
+        year: str,
+        month: str,
+        day: Optional[str] = None,
     ) -> Tuple[str, BytesIO]:
         """
         Generate a report message from a list of spendings.
@@ -78,7 +82,7 @@ class ReportService:
         ]
 
         if not spendings:
-            return "No spendings found"
+            return "No spendings found", BytesIO()
 
         text = as_list(
             as_marked_section(

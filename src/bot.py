@@ -6,8 +6,7 @@ from typing import Any, Optional
 from aiogram import Bot, Dispatcher, types
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.filters import Command
-from aiogram.types import BufferedInputFile
-
+from aiogram.types import BufferedInputFile  # noqa:WPS458
 from src.finances import Spending
 from src.phrase import HELP_MESSAGE, WELCOME_MESSAGE
 from src.report_service import ReportService
@@ -74,8 +73,6 @@ async def generate_report(message: types.Message) -> None:
             "Pass only one argument - date in format YYYY-MM or YYYY-MM-DD",
         )
         return
-
-    date_args = arguments[0].split("-")
 
     report, photo = ReportService.generate_report(*arguments[0].split("-"))
 
