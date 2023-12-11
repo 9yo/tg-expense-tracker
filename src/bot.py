@@ -1,9 +1,10 @@
 """Telegram bot for managing spendings."""
 import logging
 from collections import defaultdict
-from typing import List
+from typing import Any, List
 
 from aiogram import Bot, Dispatcher, types
+from aiogram.exceptions import TelegramBadRequest
 from aiogram.filters import Command
 from aiogram.utils.formatting import Bold, as_key_value, as_list, as_marked_section
 from src.finances import SheetSpending, Spending
@@ -73,7 +74,7 @@ async def send_welcome(message: types.Message) -> None:
     Args:
         message (types.Message): The message object from Telegram.
     """
-    await message.reply(WELCOME_MESSAGE, parse_mode="Markdown")
+    await safe_replay(message, WELCOME_MESSAGE, parse_mode="Markdown")
 
 
 @dp.message(Command("help"))
@@ -84,7 +85,7 @@ async def send_help(message: types.Message) -> None:
     Args:
         message (types.Message): The message object from Telegram.
     """
-    await message.reply(HELP_MESSAGE, parse_mode="Markdown")
+    await safe_replay(message, HELP_MESSAGE, parse_mode="Markdown")
 
 
 @dp.message(Command("report"))
@@ -98,7 +99,7 @@ async def generate_report(message: types.Message) -> None:
     logging.info(f"Generating report for message: {message}")
 
     if not message.text:
-        await message.reply("No data provided")
+        await safe_replay(message, "No data provided")
         return
 
     arguments = [el.strip() for el in message.text.split(" ")]
@@ -107,7 +108,8 @@ async def generate_report(message: types.Message) -> None:
     arguments = arguments[1:]
 
     if len(arguments) != 1:
-        await message.reply(
+        await safe_replay(
+            message,
             "Pass only one argument - date in format YYYY-MM or YYYY-MM-DD",
         )
         return
@@ -121,10 +123,14 @@ async def generate_report(message: types.Message) -> None:
             day=int(date_args[2]) if len(date_args) == 3 else None,
         )
     except ValueError as err:
-        await message.reply(str(err))
+        await safe_replay(message, str(err))
         return
 
-    await message.reply(generate_report_message(spendings), parse_mode="MarkdownV2")
+    await safe_replay(
+        message,
+        generate_report_message(spendings),
+        parse_mode="MarkdownV2",
+    )
 
 
 @dp.message()
@@ -137,7 +143,7 @@ async def add_spending(message: types.Message) -> None:
     """
     logging.info(f"Adding spendings for message: {message}")
     if not message.text:
-        await message.reply("No data provided")
+        await safe_replay(message, "No data provided")
         return
 
     spending_records = message.text.split("|")
@@ -146,17 +152,25 @@ async def add_spending(message: types.Message) -> None:
             Spending.from_string(record.strip()) for record in spending_records
         ]
         if spending_objects and len(spending_objects) > MAX_SPENDINGS_IN_BULK_REQUESTS:
-            await message.reply(
+            await safe_replay(
+                message,
                 f"Message too long: {len(spending_objects)}",  # noqa:WPS237
             )
     except ValueError as error:
-        await message.reply(str(error))
+        await safe_replay(message, str(error))
         return
-    for spending in spending_objects:
-        add_spending_spreadsheet(spending)
-    await message.reply(
+    add_spending_spreadsheet(spending_objects)
+    await safe_replay(
+        message,
         f"Spendings added, count: {len(spending_objects)}",  # noqa:WPS237
     )
+
+
+async def safe_replay(message: types.Message, *args: Any, **kwargs: Any) -> None:
+    try:
+        await message.reply(*args, **kwargs)
+    except TelegramBadRequest as err:
+        logging.info("Replay not achieved, reason: TelegramBadRequest", err)
 
 
 async def run_bot() -> None:

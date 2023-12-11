@@ -1,6 +1,7 @@
 """Module for handling spreadsheet operations."""
 
 import functools
+import logging
 from datetime import date
 from typing import Any, Dict, List, Optional
 
@@ -10,6 +11,7 @@ from googleapiclient.errors import HttpError
 from src.finances import SheetSpending, Spending
 from src.settings import SERVICE_ACCOUNT_FILE_PATH, SPREADSHEET_ID
 
+logger = logging.getLogger(__name__)
 # Constants
 SCOPES = (
     "https://www.googleapis.com/auth/spreadsheets",
@@ -262,42 +264,59 @@ def get_spendings(
     return spendings
 
 
-def add_spending(spending: Spending) -> Dict[str, str]:  # noqa: WPS210
+def add_spending(spending_list: List[Spending]) -> Dict[str, str]:  # noqa: WPS210
     """
     Adds Spending it to the Google Sheets document.
 
-    :param spending: Spending: Specify the type of data that is expected to be passed
-        into the function
+    :param spending_list: List[Spending]: Specify the type of data that is expected to
+        be passed into the function
     :return: A dictionary with a status key
     :returns: Dict[str, str]: A dictionary with a status key
     """
-    sheets_spending = SheetSpending.from_spending(spending)
+
+    sheet_spending_list: List[SheetSpending] = [
+        SheetSpending.from_spending(spending) for spending in spending_list
+    ]
 
     sheets_service = get_sheets_service()
 
     sheet = sheets_service.get(spreadsheetId=SPREADSHEET_ID).execute()
 
-    sub_sheet_name = generate_sub_sheet_name(
-        spending.datetime.year,
-        spending.datetime.month,
-    )
+    spending_by_date: Dict[str, List[SheetSpending]] = {}
 
-    sub_sheet_id: Optional[int] = find_sub_sheet(sheet, sub_sheet_name)
+    for spending in sheet_spending_list:
+        sub_sheet_name = generate_sub_sheet_name(
+            spending.datetime.year,
+            spending.datetime.month,
+        )
+        if sub_sheet_name not in spending_by_date:
+            spending_by_date[sub_sheet_name] = []
+        spending_by_date[sub_sheet_name].append(spending)
 
-    if sub_sheet_id is None:
-        sub_sheet_response: Dict[str, Any] = create_sub_sheet(
-            sheets_service,
-            sub_sheet_name,
-        )["replies"][0]["addSheet"]
-        sub_sheet_id = sub_sheet_response["properties"]["sheetId"]
-        design_sub_sheet(sheets_service, sub_sheet_name, sub_sheet_id)
+    for ssn, spendings in spending_by_date.items():
+        sub_sheet_id: Optional[int] = find_sub_sheet(sheet, ssn)
 
-    append_to_last_row(
-        sheets_service=sheets_service,
-        spreadsheet_id=SPREADSHEET_ID,
-        sheet_name=sub_sheet_name,
-        sheet_id=sub_sheet_id,
-        row_data=[list(sheets_spending.model_dump().values())],
-    )
+        if sub_sheet_id is None:
+            sub_sheet_response: Dict[str, Any] = create_sub_sheet(
+                sheets_service,
+                ssn,
+            )[
+                "replies"
+            ][0]["addSheet"]
+            sub_sheet_id = sub_sheet_response["properties"]["sheetId"]
+            design_sub_sheet(sheets_service, ssn, sub_sheet_id)
 
+        logger.info(f"Adding spending {spendings}")
+
+        row_data: List[List[Any]] = []
+        for spending_row in spendings:
+            row_data.append(list(spending_row.model_dump().values()))
+
+        append_to_last_row(
+            sheets_service=sheets_service,
+            spreadsheet_id=SPREADSHEET_ID,
+            sheet_name=ssn,
+            sheet_id=sub_sheet_id,
+            row_data=row_data,
+        )
     return {"status": "Values updated successfully"}
