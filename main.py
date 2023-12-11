@@ -1,9 +1,12 @@
 """FastAPI server for webhook."""
-from typing import Any, Dict
+import logging
+from json import JSONDecodeError
+from typing import Any, Dict, Optional
 
 import requests
 from aiogram import types
 from fastapi import FastAPI, Request
+
 from src.bot import bot, bot_url, dp
 from src.settings import WEBHOOK_HOST
 
@@ -20,7 +23,12 @@ async def get_telegram_update(request: Request) -> Dict[str, bool]:
     Returns:
         dict: A success status.
     """
-    request_data = await request.json()
+    try:
+        request_data = await request.json()
+    except JSONDecodeError as err:
+        logging.error(f"Invalid request data from Telegram!!!, {err}")
+        # HOT FIX: Telegram sends empty updates sometimes or invalid JSON
+        return {"success": True}
     update = types.Update(**request_data)
     await dp.feed_update(bot, update)
     return {"success": True}
@@ -33,6 +41,7 @@ def url_setter() -> Dict[Any, Any]:
     Returns:
         dict: The response from the webhook URL setup.
     """
-    set_url = f"{bot_url}/setWebHook?url=https://{WEBHOOK_HOST}/webhook"
+    set_url = (f"{bot_url}/setWebHook?url=https://{WEBHOOK_HOST}"
+               f"/webhook?drop_pending_updates={str(True)}")
     resp = requests.get(set_url, timeout=10)  # Added a timeout
     return resp.json()
