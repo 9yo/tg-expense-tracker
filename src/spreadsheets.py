@@ -237,7 +237,11 @@ def read_spreedsheet(year: int, month: int, day: Optional[int] = None) -> Any:
     )
 
 
-def get_spendings(year: int, month: int, day: Optional[int] = None) -> List[SheetSpending]:
+def get_spendings(
+    year: int,
+    month: int,
+    day: Optional[int] = None,
+) -> List[SheetSpending]:
     """
     Returns a list of SheetSpending objects.
 
