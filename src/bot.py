@@ -80,6 +80,7 @@ async def generate_report(message: types.Message) -> None:
         message,
         photo=photo,
         caption=report,
+        text=report,
         parse_mode="MarkdownV2",
     )
 

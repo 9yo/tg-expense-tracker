@@ -2,8 +2,9 @@ from collections import defaultdict
 from io import BytesIO
 from typing import List, Optional, Tuple
 
+import pygal
 from aiogram.utils.formatting import Bold, as_key_value, as_list, as_marked_section
-from matplotlib import pyplot as plt
+# from matplotlib import pyplot as plt
 from src.finances import SheetSpending
 from src.spreadsheets import get_spendings
 
@@ -15,36 +16,55 @@ class ReportService:
             categ for _, categ in sorted(zip(percentages, categories), reverse=True)
         ]
         sorted_percentages = sorted(percentages, reverse=True)
-
-        # Create a pie chart
-        plt.figure(figsize=(10, 10))
-
-        chart_rotation = 140
-
-        plt.pie(
-            sorted_percentages,
-            labels=sorted_categories,
-            autopct="%1.1f%%",  # noqa:WPS323
-            startangle=chart_rotation,
-        )
-
-        # Improve legibility by moving the legend outside the plot
-        plt.legend(
-            sorted_categories,
-            title="Categories",
-            loc="center left",
-            bbox_to_anchor=(1, 0, 0.5, 1),
-        )
-
-        plt.axis("equal")  # Equal aspect ratio ensures that pie is drawn as a circle.
-        plt.title("Spendings by Category in Percentages")
-
-        # Save plot to a BytesIO object and reset buffer position to the beginning
-        buf = BytesIO()
-        plt.savefig(buf, format="png", bbox_inches="tight")
-        buf.seek(0)
-
-        return buf
+        # TODO FIX THIS
+        # DETA DONT ACCEPT PYGAL, because editional sytem packages required
+        # DETA DONT ACCEPT MATHPLOTLIB, because it is veryheavy ~150-200mb
+        # ------------
+        # pie_chart = pygal.Pie(inner_radius=.4)
+        # pie_chart.title = 'Spendings by Category in Percentages'
+        #
+        # for percentage, category in zip(sorted_percentages, sorted_categories):
+        #     pie_chart.add(f"{category} {round(percentage, 1)}%", percentage)
+        #
+        # # Render the pie chart to a BytesIO object
+        # buf = BytesIO()
+        # pie_chart.render_to_png(buf)
+        # buf.seek(0)
+        # ------------
+        # sorted_categories = [
+        #     categ for _, categ in sorted(zip(percentages, categories), reverse=True)
+        # ]
+        # sorted_percentages = sorted(percentages, reverse=True)
+        #
+        # # Create a pie chart
+        # plt.figure(figsize=(10, 10))
+        #
+        # chart_rotation = 140
+        #
+        # plt.pie(
+        #     sorted_percentages,
+        #     labels=sorted_categories,
+        #     autopct="%1.1f%%",  # noqa:WPS323
+        #     startangle=chart_rotation,
+        # )
+        #
+        # # Improve legibility by moving the legend outside the plot
+        # plt.legend(
+        #     sorted_categories,
+        #     title="Categories",
+        #     loc="center left",
+        #     bbox_to_anchor=(1, 0, 0.5, 1),
+        # )
+        #
+        # plt.axis("equal")  # Equal aspect ratio ensures that pie is drawn as a circle.
+        # plt.title("Spendings by Category in Percentages")
+        #
+        # # Save plot to a BytesIO object and reset buffer position to the beginning
+        # buf = BytesIO()
+        # plt.savefig(buf, format="png", bbox_inches="tight")
+        # buf.seek(0)
+        #
+        return None
 
     @classmethod
     def generate_report(  # noqa:WPS210
