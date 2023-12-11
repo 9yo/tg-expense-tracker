@@ -2,8 +2,9 @@ import json
 from datetime import date
 from typing import Any, List, Literal, Optional
 
-import google_currency
 from pydantic import BaseModel, Field
+
+from src.currency_converter import CurrencyConverter
 
 
 class Spending(BaseModel):
@@ -80,17 +81,27 @@ class SheetSpending(Spending):
 
     @classmethod
     def from_list(cls, list_: List[Any]) -> "SheetSpending":
+        cost = float(list_[3].replace(",", "."))
+        currency = list_[4]
+        try:
+            usd: float = float(list_[7].replace(",", "."))
+        except IndexError:
+            usd: float = CurrencyConverter.convert(
+                amount=cost,
+                from_currency=currency,
+                to_currency="USD",
+            )
         return cls(
             name=list_[0],
             category=list_[1],
             description=list_[2],
-            cost=float(list_[3].replace(",", ".")),
-            currency=list_[4],
+            cost=cost,
+            currency=currency,
             source=list_[5],
             datetime=date.fromisoformat(
                 list_[6],
             ),  # Assumes date in ISO format (YYYY-MM-DD)
-            usd=float(list_[7].replace(",", ".")),
+            usd=usd,
         )
 
     @classmethod
@@ -101,13 +112,11 @@ class SheetSpending(Spending):
             usd_amount = spending.cost
 
         else:
-            convert_resp: str = google_currency.convert(
-                amnt=spending.cost,
-                currency_from=spending.currency,
-                currency_to="USD",
+            usd_amount: float = CurrencyConverter.convert(
+                amount=spending.cost,
+                from_currency=spending.currency,
+                to_currency="USD",
             )
-            if usd_amount:
-                usd_amount = json.loads(convert_resp).get("amount", None)
 
         return cls(
             name=spending.name,
