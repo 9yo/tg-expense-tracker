@@ -1,15 +1,18 @@
 """Module for handling spreadsheet operations."""
 
 import functools
+import logging
 from datetime import date
 from typing import Any, Dict, List, Optional
 
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+
 from src.finances import SheetSpending, Spending
 from src.settings import SERVICE_ACCOUNT_FILE_PATH, SPREADSHEET_ID
 
+logger = logging.getLogger(__name__)
 # Constants
 SCOPES = (
     "https://www.googleapis.com/auth/spreadsheets",
@@ -291,6 +294,8 @@ def add_spending(spending: Spending) -> Dict[str, str]:  # noqa: WPS210
         )["replies"][0]["addSheet"]
         sub_sheet_id = sub_sheet_response["properties"]["sheetId"]
         design_sub_sheet(sheets_service, sub_sheet_name, sub_sheet_id)
+
+    logger.info(f"Adding spending {sheets_spending}")
 
     append_to_last_row(
         sheets_service=sheets_service,
