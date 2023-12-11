@@ -8,7 +8,7 @@ from aiogram.filters import Command
 from aiogram.utils.formatting import Bold, as_key_value, as_list, as_marked_section
 from src.finances import SheetSpending, Spending
 from src.phrase import HELP_MESSAGE, WELCOME_MESSAGE
-from src.settings import TELEGRAM_BOT_TOKEN
+from src.settings import TELEGRAM_BOT_TOKEN, MAX_SPENDINGS_IN_BULK_REQUESTS
 from src.spreadsheets import add_spending as add_spending_spreadsheet
 from src.spreadsheets import get_spendings
 
@@ -145,6 +145,10 @@ async def add_spending(message: types.Message) -> None:
         spending_objects = [
             Spending.from_string(record.strip()) for record in spending_records
         ]
+        if spending_objects and len(spending_objects) > MAX_SPENDINGS_IN_BULK_REQUESTS:
+            await message.reply(
+                f"Message too long: {len(spending_objects)}",  # noqa:WPS237
+            )
     except ValueError as error:
         await message.reply(str(error))
         return
