@@ -72,6 +72,10 @@ ignore =
   WPS473,
   ; too many no-cover comments.
   WPS403,
+  ; Found `%` string formatting
+  WPS323,
+  ; Found explicit string concatenation
+  WPS336,
 
 per-file-ignores =
   ; all tests

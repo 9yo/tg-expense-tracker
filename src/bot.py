@@ -1,17 +1,17 @@
 """Telegram bot for managing spendings."""
 import logging
-from collections import defaultdict
-from typing import Any, List
+from io import BytesIO
+from typing import Any, Optional
 
 from aiogram import Bot, Dispatcher, types
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.filters import Command
-from aiogram.utils.formatting import Bold, as_key_value, as_list, as_marked_section
-from src.finances import SheetSpending, Spending
+from aiogram.types import BufferedInputFile  # noqa:WPS458
+from src.finances import Spending
 from src.phrase import HELP_MESSAGE, WELCOME_MESSAGE
-from src.settings import MAX_SPENDINGS_IN_BULK_REQUESTS, TELEGRAM_BOT_TOKEN
+from src.report_service import ReportService
+from src.settings import TELEGRAM_BOT_TOKEN
 from src.spreadsheets import add_spending as add_spending_spreadsheet
-from src.spreadsheets import get_spendings
 
 logging.basicConfig(level=logging.INFO)
 
@@ -24,46 +24,6 @@ bot_commands = [
 
 bot = Bot(TELEGRAM_BOT_TOKEN)
 dp = Dispatcher(bot=bot)
-
-
-def generate_report_message(spendings: List[SheetSpending]) -> str:
-    """
-    Generate a report message from a list of spendings.
-
-    Args:
-        spendings (List[SheetSpending]): List of spendings to be included in the report.
-
-    Returns:
-        str: Formatted report message.
-    """
-    spendings_by_category: defaultdict[str, float] = defaultdict(float)
-    total_spendings: float = 0
-    for spending in spendings:
-        total_spendings += spending.usd or 0
-        spendings_by_category[spending.category] += spending.usd or 0
-
-    if not spendings:
-        return "No spendings found"
-
-    return as_list(
-        as_marked_section(
-            Bold("Total spendings by category"),
-            *[
-                as_key_value(category, cost)
-                for category, cost in spendings_by_category.items()
-            ],
-        ),
-        as_marked_section(
-            Bold("Summary:"),
-            as_key_value("Total spendings", total_spendings),
-            as_key_value("Total spendings records", len(spendings)),
-            as_key_value(
-                "Total days found",
-                len({spnd.datetime.day for spnd in spendings}),
-            ),
-        ),
-        sep="\n\n",
-    ).as_markdown()
 
 
 @dp.message(Command("start"))
@@ -114,21 +74,13 @@ async def generate_report(message: types.Message) -> None:
         )
         return
 
-    date_args = arguments[0].split("-")
-
-    try:
-        spendings: List[SheetSpending] = get_spendings(
-            year=int(date_args[0]),
-            month=int(date_args[1]),
-            day=int(date_args[2]) if len(date_args) == 3 else None,
-        )
-    except ValueError as err:
-        await safe_replay(message, str(err))
-        return
+    report, photo = ReportService.generate_report(*arguments[0].split("-"))
 
     await safe_replay(
         message,
-        generate_report_message(spendings),
+        photo=photo,
+        caption=report,
+        text=report,
         parse_mode="MarkdownV2",
     )
 
@@ -151,11 +103,6 @@ async def add_spending(message: types.Message) -> None:
         spending_objects = [
             Spending.from_string(record.strip()) for record in spending_records
         ]
-        if spending_objects and len(spending_objects) > MAX_SPENDINGS_IN_BULK_REQUESTS:
-            await safe_replay(
-                message,
-                f"Message too long: {len(spending_objects)}",  # noqa:WPS237
-            )
     except ValueError as error:
         await safe_replay(message, str(error))
         return
@@ -166,9 +113,21 @@ async def add_spending(message: types.Message) -> None:
     )
 
 
-async def safe_replay(message: types.Message, *args: Any, **kwargs: Any) -> None:
+async def safe_replay(
+    message: types.Message,
+    *args: Any,
+    photo: Optional[BytesIO] = None,
+    **kwargs: Any,
+) -> None:
     try:
-        await message.reply(*args, **kwargs)
+        if photo:
+            await message.reply_photo(
+                BufferedInputFile(photo.read(), filename="report.png"),
+                *args,
+                **kwargs,
+            )
+        else:
+            await message.reply(*args, **kwargs)
     except TelegramBadRequest as err:
         logging.info("Replay not achieved, reason: TelegramBadRequest", err)
 
