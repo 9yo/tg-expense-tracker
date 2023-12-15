@@ -1,20 +1,9 @@
 from datetime import date
 from typing import Any, List, Literal, Optional
 
-from aiogram.fsm.state import State, StatesGroup
 from pydantic import BaseModel, Field
+
 from src.currency_converter import CurrencyConverter
-
-
-class SpendingForm(StatesGroup):
-    name = State()
-    category = State()
-    description = State()
-    cost = State()
-    currency = State()
-    source = State()
-    datetime = State()
-    confirmation = State()
 
 
 class Spending(BaseModel):

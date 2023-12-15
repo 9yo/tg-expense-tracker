@@ -67,13 +67,24 @@ def generate_confirm_keyboard(**kwargs) -> ReplyKeyboardMarkup:
     )
 
 
-def generate_datetime_keyboard() -> ReplyKeyboardMarkup:
+def generate_datetime_keyboard(days=True) -> ReplyKeyboardMarkup:
     today = datetime.today()
-    dates = [
-        today,
-        today - timedelta(days=1),
-        today - timedelta(days=2),
-    ]
+    if days:
+        dates = [
+            today,
+            today - timedelta(days=1),
+            today - timedelta(days=2),
+        ]
+        dates = [d.strftime("%Y-%m-%d") for d in dates]
+    else:
+        month_per_day = 30
+        dates = [
+            today,
+            today - timedelta(days=month_per_day),
+            today - timedelta(days=month_per_day * 2),
+            today - timedelta(days=month_per_day * 3),
+        ]
+        dates = [d.strftime("%Y-%m") for d in dates]
     return ReplyKeyboardMarkup(
-        keyboard=[[KeyboardButton(text=date.strftime("%Y-%m-%d"))] for date in dates],
+        keyboard=[[KeyboardButton(text=date)] for date in dates],
     )

@@ -18,6 +18,7 @@ async def safe_replay(
         if photo:
             await message.reply_photo(
                 BufferedInputFile(photo.read(), filename="report.png"),
+                reply_markup=keyboard,
                 *args,
                 **kwargs,
             )

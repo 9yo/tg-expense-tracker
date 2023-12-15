@@ -4,6 +4,7 @@ import logging
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
 from src.bot.commands.add_expense import router as spending_router
+from src.bot.commands.add_report import router as report_router
 from src.bot.reply import safe_replay
 from src.keyboard_service import start_keyboard
 from src.phrase import HELP_MESSAGE, WELCOME_MESSAGE
@@ -51,41 +52,41 @@ async def send_help(message: types.Message) -> None:
     await safe_replay(message, HELP_MESSAGE, parse_mode="Markdown")
 
 
-@dp.message(Command("report"))
-async def generate_report(message: types.Message) -> None:
-    """
-    Generate and send a spending report.
-
-    Args:
-        message (types.Message): The message object from Telegram.
-    """
-    logging.info(f"Generating report for message: {message}")
-
-    if not message.text:
-        await safe_replay(message, "No data provided")
-        return
-
-    arguments = [el.strip() for el in message.text.split(" ")]
-
-    # remove headers
-    arguments = arguments[1:]
-
-    if len(arguments) != 1:
-        await safe_replay(
-            message,
-            "Pass only one argument - date in format YYYY-MM or YYYY-MM-DD",
-        )
-        return
-
-    report, photo = ReportService.generate_report(*arguments[0].split("-"))
-
-    await safe_replay(
-        message,
-        photo=photo,
-        caption=report,
-        text=report,
-        parse_mode="MarkdownV2",
-    )
+# @dp.message(Command("report"))
+# async def generate_report(message: types.Message) -> None:
+#     """
+#     Generate and send a spending report.
+#
+#     Args:
+#         message (types.Message): The message object from Telegram.
+#     """
+#     logging.info(f"Generating report for message: {message}")
+#
+#     if not message.text:
+#         await safe_replay(message, "No data provided")
+#         return
+#
+#     arguments = [el.strip() for el in message.text.split(" ")]
+#
+#     # remove headers
+#     arguments = arguments[1:]
+#
+#     if len(arguments) != 1:
+#         await safe_replay(
+#             message,
+#             "Pass only one argument - date in format YYYY-MM or YYYY-MM-DD",
+#         )
+#         return
+#
+#     report, photo = ReportService.generate_report(*arguments[0].split("-"))
+#
+#     await safe_replay(
+#         message,
+#         photo=photo,
+#         caption=report,
+#         text=report,
+#         parse_mode="MarkdownV2",
+#     )
 
 
 # @dp.message()
@@ -120,7 +121,7 @@ async def run_bot() -> None:
     """Run the Telegram bot."""
     await bot.set_my_commands(bot_commands)
     dp.include_router(spending_router)
-    print(dp.__dict__)
+    dp.include_router(report_router)
 
     await dp.start_polling(bot)
 

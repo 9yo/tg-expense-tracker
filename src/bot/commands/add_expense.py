@@ -6,7 +6,8 @@ from aiogram.types import ReplyKeyboardRemove
 
 from src.bot.filters import CustomFilter
 from src.bot.reply import safe_replay
-from src.finances import Spending, SpendingForm
+from src.finances import Spending
+from src.bot.forms.spending import SpendingForm
 from src.keyboard_service import (
     ADD_SPENDING,
     CANCEL_COMMAND,
@@ -122,7 +123,7 @@ async def add_spending_confirmation(message: types.Message, state: FSMContext) -
         await state.clear()
         await message.answer(
             "Cancelled.",
-            reply_markup=ReplyKeyboardRemove(),
+            reply_markup=start_keyboard,
         )
 
     elif message.text == CONFIRM_COMMAND:
