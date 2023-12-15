@@ -8,7 +8,6 @@ from src.bot.commands.add_report import router as report_router
 from src.bot.reply import safe_replay
 from src.keyboard_service import start_keyboard
 from src.phrase import HELP_MESSAGE, WELCOME_MESSAGE
-from src.report_service import ReportService
 from src.settings import TELEGRAM_BOT_TOKEN
 
 logging.basicConfig(level=logging.INFO)

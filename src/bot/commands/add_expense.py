@@ -3,11 +3,10 @@ import logging
 from aiogram import Router, types
 from aiogram.fsm.context import FSMContext
 from aiogram.types import ReplyKeyboardRemove
-
 from src.bot.filters import CustomFilter
+from src.bot.forms.spending import SpendingForm
 from src.bot.reply import safe_replay
 from src.finances import Spending
-from src.bot.forms.spending import SpendingForm
 from src.keyboard_service import (
     ADD_SPENDING,
     CANCEL_COMMAND,
@@ -105,7 +104,7 @@ async def add_spending_datetime(message: types.Message, state: FSMContext) -> No
     await state.set_state(SpendingForm.confirmation)
     await safe_replay(
         message,
-        text=f"Confirm spending:",
+        text="Confirm spending:",
         keyboard=generate_confirm_keyboard(**await state.get_data()),
     )
 

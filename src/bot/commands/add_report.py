@@ -1,14 +1,9 @@
 from aiogram import Router, types
 from aiogram.fsm.context import FSMContext
-
 from src.bot.filters import CustomFilter
 from src.bot.forms.report import ReportFrom
 from src.bot.reply import safe_replay
-from src.keyboard_service import (
-    SHOW_REPORT,
-    generate_datetime_keyboard,
-    start_keyboard,
-)
+from src.keyboard_service import SHOW_REPORT, generate_datetime_keyboard, start_keyboard
 from src.report_service import ReportService
 
 router = Router()
