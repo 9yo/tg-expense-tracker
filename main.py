@@ -6,7 +6,7 @@ from typing import Any, Dict
 import requests
 from aiogram import types
 from fastapi import FastAPI, Request
-from src.bot import bot, bot_url, dp
+from src.bot.bot import bot, bot_url, dp
 from src.settings import WEBHOOK_HOST
 
 app = FastAPI()

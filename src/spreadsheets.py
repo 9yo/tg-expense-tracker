@@ -9,7 +9,7 @@ from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from src.finances import SheetSpending, Spending
-from src.settings import SERVICE_ACCOUNT_FILE_PATH, SPREADSHEET_ID
+from src.settings import OVERVIEW_SHEET_NAME, SERVICE_ACCOUNT_FILE_PATH, SPREADSHEET_ID
 
 logger = logging.getLogger(__name__)
 # Constants
@@ -320,3 +320,28 @@ def add_spending(spending_list: List[Spending]) -> Dict[str, str]:  # noqa: WPS2
             row_data=row_data,
         )
     return {"status": "Values updated successfully"}
+
+
+def get_categories() -> List[str]:
+    """Get a list of categories from the spreadsheet."""
+    sheets_service = get_sheets_service()
+    sheet = sheets_service.get(spreadsheetId=SPREADSHEET_ID).execute()
+    sub_sheet_id = find_sub_sheet(sheet, OVERVIEW_SHEET_NAME)
+    if sub_sheet_id is None:
+        return []
+    sheet_data = (
+        sheets_service.values()
+        .batchGet(
+            spreadsheetId=SPREADSHEET_ID,
+            ranges=[f"{OVERVIEW_SHEET_NAME}!A2:A27"],
+        )
+        .execute()
+    )
+    data = []
+    for el in sheet_data["valueRanges"][0].get("values", []):
+        try:
+            data.append(el[0])
+        except IndexError:
+            continue
+
+    return data

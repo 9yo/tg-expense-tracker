@@ -1,17 +1,14 @@
 """Telegram bot for managing spendings."""
 import logging
-from io import BytesIO
-from typing import Any, Optional
 
 from aiogram import Bot, Dispatcher, types
-from aiogram.exceptions import TelegramBadRequest
 from aiogram.filters import Command
-from aiogram.types import BufferedInputFile  # noqa:WPS458
-from src.finances import Spending
+from src.bot.commands.add_expense import router as spending_router
+from src.bot.reply import safe_replay
+from src.keyboard_service import start_keyboard
 from src.phrase import HELP_MESSAGE, WELCOME_MESSAGE
 from src.report_service import ReportService
 from src.settings import TELEGRAM_BOT_TOKEN
-from src.spreadsheets import add_spending as add_spending_spreadsheet
 
 logging.basicConfig(level=logging.INFO)
 
@@ -33,8 +30,14 @@ async def send_welcome(message: types.Message) -> None:
 
     Args:
         message (types.Message): The message object from Telegram.
+        state (FSMContext): The state of the bot.
     """
-    await safe_replay(message, WELCOME_MESSAGE, parse_mode="Markdown")
+    await safe_replay(
+        message,
+        text=WELCOME_MESSAGE,
+        parse_mode="Markdown",
+        keyboard=start_keyboard,
+    )
 
 
 @dp.message(Command("help"))
@@ -85,56 +88,40 @@ async def generate_report(message: types.Message) -> None:
     )
 
 
-@dp.message()
-async def add_spending(message: types.Message) -> None:
-    """
-    Add a spending record.
-
-    Args:
-        message (types.Message): The message object containing the spending data.
-    """
-    logging.info(f"Adding spendings for message: {message}")
-    if not message.text:
-        await safe_replay(message, "No data provided")
-        return
-
-    spending_records = message.text.split("|")
-    try:
-        spending_objects = [
-            Spending.from_string(record.strip()) for record in spending_records
-        ]
-    except ValueError as error:
-        await safe_replay(message, str(error))
-        return
-    add_spending_spreadsheet(spending_objects)
-    await safe_replay(
-        message,
-        f"Spendings added, count: {len(spending_objects)}",  # noqa:WPS237
-    )
-
-
-async def safe_replay(
-    message: types.Message,
-    *args: Any,
-    photo: Optional[BytesIO] = None,
-    **kwargs: Any,
-) -> None:
-    try:
-        if photo:
-            await message.reply_photo(
-                BufferedInputFile(photo.read(), filename="report.png"),
-                *args,
-                **kwargs,
-            )
-        else:
-            await message.reply(*args, **kwargs)
-    except TelegramBadRequest as err:
-        logging.info("Replay not achieved, reason: TelegramBadRequest", err)
+# @dp.message()
+# async def add_spending(message: types.Message) -> None:
+#     """
+#     Add a spending record.
+#
+#     Args:
+#         message (types.Message): The message object containing the spending data.
+#     """
+#     logging.info(f"Adding spendings for message: {message}")
+#     if not message.text:
+#         await safe_replay(message, "No data provided")
+#         return
+#
+#     spending_records = message.text.split("|")
+#     try:
+#         spending_objects = [
+#             Spending.from_string(record.strip()) for record in spending_records
+#         ]
+#     except ValueError as error:
+#         await safe_replay(message, str(error))
+#         return
+#     add_spending_spreadsheet(spending_objects)
+#     await safe_replay(
+#         message,
+#         f"Spendings added, count: {len(spending_objects)}",  # noqa:WPS237
+#     )
 
 
 async def run_bot() -> None:
     """Run the Telegram bot."""
     await bot.set_my_commands(bot_commands)
+    dp.include_router(spending_router)
+    print(dp.__dict__)
+
     await dp.start_polling(bot)
 
 

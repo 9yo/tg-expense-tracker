@@ -1,1 +1,7 @@
 .env
+.mypy_cache
+.pytest_cache
+.git
+.github
+.idea
+README.md
